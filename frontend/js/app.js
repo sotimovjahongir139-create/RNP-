@@ -5,31 +5,37 @@ function getToken(){return localStorage.getItem('rnp_token')||SB_KEY;}
 function authHeaders(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+getToken()};}
 
 async function sbLogin(email,password){
-  const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
-  const d=await r.json();
-  if(!r.ok)return{error:{message:d.error_description||d.msg||'Xato'}};
-  localStorage.setItem('rnp_token',d.access_token);
-  localStorage.setItem('rnp_user',JSON.stringify(d.user));
-  return{data:{user:d.user}};
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
+    const d=await r.json();
+    if(!r.ok)return{error:{message:d.error_description||d.msg||'Login yoki parol xato'}};
+    localStorage.setItem('rnp_token',d.access_token);
+    localStorage.setItem('rnp_user',JSON.stringify(d.user));
+    return{data:{user:d.user}};
+  }catch(e){return{error:{message:'Tarmoq xatosi: '+e.message}};}
 }
 
 async function sbGet(table,filters={}){
-  let q=SB_URL+'/rest/v1/'+table+'?select=*';
-  Object.entries(filters).forEach(([k,v])=>{q+='&'+k+'=eq.'+encodeURIComponent(v);});
-  q+='&order=sort_order';
-  const r=await fetch(q,{headers:authHeaders()});
-  const d=await r.json();
-  return r.ok?{data:d}:{data:[],error:d};
+  try{
+    let q=SB_URL+'/rest/v1/'+table+'?select=*';
+    Object.entries(filters).forEach(([k,v])=>{q+='&'+k+'=eq.'+encodeURIComponent(v);});
+    q+='&order=sort_order';
+    const r=await fetch(q,{headers:authHeaders()});
+    const d=await r.json();
+    return r.ok?{data:d}:{data:[],error:d};
+  }catch(e){return{data:[],error:{message:e.message}};}
 }
 
 async function sbUpsert(table,body,conflict){
-  const r=await fetch(SB_URL+'/rest/v1/'+table+'?on_conflict='+conflict,{
-    method:'POST',
-    headers:{...authHeaders(),'Prefer':'resolution=merge-duplicates,return=representation'},
-    body:JSON.stringify(body)
-  });
-  const d=await r.json();
-  return r.ok?{data:Array.isArray(d)?d[0]:d}:{error:{message:JSON.stringify(d)}};
+  try{
+    const r=await fetch(SB_URL+'/rest/v1/'+table+'?on_conflict='+conflict,{
+      method:'POST',
+      headers:{...authHeaders(),'Prefer':'resolution=merge-duplicates,return=representation'},
+      body:JSON.stringify(body)
+    });
+    const d=await r.json();
+    return r.ok?{data:Array.isArray(d)?d[0]:d}:{error:{message:JSON.stringify(d)}};
+  }catch(e){return{error:{message:e.message}};}
 }
 
 let currentUser=null,params=[],entries={},activeParam=null,currentDate=today();
@@ -70,10 +76,15 @@ async function doLogin(){
   errEl.textContent='';
   if(!email||!pass){errEl.textContent='Email va parol kiriting';return;}
   btn.textContent='Kirilmoqda...';btn.disabled=true;
-  const{data,error}=await sbLogin(email,pass);
-  if(error){errEl.textContent=error.message;btn.textContent='Kirish';btn.disabled=false;return;}
-  currentUser=data.user;showApp();await loadAll();
-  btn.textContent='Kirish';btn.disabled=false;
+  try{
+    const{data,error}=await sbLogin(email,pass);
+    if(error){errEl.textContent=error.message;return;}
+    currentUser=data.user;showApp();await loadAll();
+  }catch(e){
+    errEl.textContent='Xato: '+e.message;
+  }finally{
+    btn.textContent='Kirish';btn.disabled=false;
+  }
 }
 
 function showLogin(){document.getElementById('loginOverlay').classList.remove('hidden');document.getElementById('app').classList.add('hidden');document.getElementById('loginPassword').value='';}
