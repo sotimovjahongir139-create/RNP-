@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RNP</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">RNP</div>
+    <div class="login-sub">Ishlab chiqarish tizimi</div>
+    <form onsubmit="handleLogin(event)">
+      <input id="loginUser" type="text"     placeholder="Foydalanuvchi nomi" required autocomplete="username">
+      <input id="loginPass" type="password" placeholder="Parol"              required autocomplete="current-password">
+      <div id="loginErr" class="login-err"></div>
+      <button type="submit">Kirish</button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════ APP ═══════════ -->
+<div id="appPage">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">RNP</div>
+
+    <div class="sidebar-section">Ishlab chiqarish</div>
+    <div class="nav-item active" data-page="kiritish" onclick="showPage('kiritish')">
+      <span class="nav-icon">🏭</span> Ishlab chiqarish
+    </div>
+
+    <div class="sidebar-section">Tahlil</div>
+    <div class="nav-item" data-page="tahlil" onclick="showPage('tahlil')">
+      <span class="nav-icon">📈</span> Tahlil
+    </div>
+
+    <div class="sidebar-footer">
+      <span id="sidebarUser" class="sidebar-username"></span>
+      <span class="logout-btn" onclick="Auth.logout()">Chiqish ↩</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <span id="pageTitle" class="topbar-title">Ishlab chiqarish</span>
+      <div class="topbar-right">
+        <input type="date" id="datePicker" class="date-input"
+               onchange="onDateChange(this.value)">
+        <div id="searchBlock" class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Qidirish..."
+                 oninput="renderList()">
+        </div>
+      </div>
+    </header>
+
+    <!-- PAGE: KIRITISH -->
+    <div id="pageKiritish" style="display:flex;flex:1;overflow:hidden;min-height:0">
+      <div class="param-list" id="paramList"></div>
+      <div class="input-panel" id="inputPanel">
+        <div class="ip-hint">👈 Ko'rsatkichni tanlang va qiymat kiriting</div>
+      </div>
+    </div>
+
+    <!-- PAGE: TAHLIL -->
+    <div id="pageTahlil" style="display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0">
+      <div class="period-tabs-wrap">
+        <div class="ptab active" onclick="setPeriod('daily',this)">Kunlik</div>
+        <div class="ptab" onclick="setPeriod('weekly',this)">Haftalik</div>
+        <div class="ptab" onclick="setPeriod('monthly',this)">Oylik</div>
+      </div>
+      <div class="tahlil-body" id="tahlilContent"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /appPage -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+<script>
+  document.getElementById('datePicker').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
