@@ -1,8 +1,11 @@
 const SB_URL='https://tzfwlailknlxwdgxvxrc.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6ZndsYWlsa25seHdkZ3h2eHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1Mzg2NDYsImV4cCI6MjA5NzExNDY0Nn0.fPdICmSn18Diq3IuDCzSYPj1jnyPShFPJFY0PbJGsso';
 
+function today(){return new Date().toISOString().split('T')[0];}
 function getToken(){return localStorage.getItem('rnp_token')||SB_KEY;}
 function authHeaders(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+getToken()};}
+
+let currentUser=null,params=[],entries={},activeParam=null,currentDate=today();
 
 async function sbLogin(email,password){
   try{
@@ -38,8 +41,6 @@ async function sbUpsert(table,body,conflict){
   }catch(e){return{error:{message:e.message}};}
 }
 
-let currentUser=null,params=[],entries={},activeParam=null,currentDate=today();
-
 document.addEventListener('DOMContentLoaded',async()=>{
   document.getElementById('dateInput').value=currentDate;
   bindUI();
@@ -48,8 +49,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
   if(u&&t){currentUser=JSON.parse(u);showApp();await loadAll();}
   else showLogin();
 });
-
-function today(){return new Date().toISOString().split('T')[0];}
 
 function bindUI(){
   document.getElementById('loginBtn').addEventListener('click',doLogin);
