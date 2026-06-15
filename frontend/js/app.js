@@ -1,294 +1,119 @@
-// ─── STATE ──────────────────────────────────────────────────
-const S = {
-  page:     'kiritish',
-  date:     new Date().toISOString().split('T')[0],
-  period:   'daily',
-  selected: null,
-  params:   [],
-  facts:    {},
-};
-
-// ─── HELPERS ────────────────────────────────────────────────
-function esc(s) {
-  return s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+let currentUser=null,params=[],entries={},activeParam=null,currentDate=today();
+document.addEventListener('DOMContentLoaded',async()=>{
+  document.getElementById('dateInput').value=currentDate;
+  bindUI();
+  const{data:{session}}=await supabase.auth.getSession();
+  if(session){currentUser=session.user;showApp();await loadAll();}
+  else showLogin();
+  supabase.auth.onAuthStateChange((_,session)=>{if(!session)showLogin();});
+});
+function today(){return new Date().toISOString().split('T')[0];}
+function bindUI(){
+  document.getElementById('loginBtn').addEventListener('click',doLogin);
+  document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('logoutBtn').addEventListener('click',async()=>{await supabase.auth.signOut();showLogin();});
+  document.getElementById('dateInput').addEventListener('change',async e=>{currentDate=e.target.value;await loadEntries();renderParams();});
+  document.getElementById('searchInput').addEventListener('input',e=>{renderParams(e.target.value.toLowerCase());});
+  document.getElementById('saveBtn').addEventListener('click',saveValue);
+  document.getElementById('valueInput').addEventListener('keydown',e=>{if(e.key==='Enter')saveValue();});
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('sidebarOverlay');
+  document.getElementById('menuBtn').addEventListener('click',()=>{sidebar.classList.add('open');overlay.classList.add('active');});
+  const closeSidebar=()=>{sidebar.classList.remove('open');overlay.classList.remove('active');};
+  document.getElementById('sidebarClose').addEventListener('click',closeSidebar);
+  overlay.addEventListener('click',closeSidebar);
+  document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));item.classList.add('active');closeSidebar();});});
 }
-
-function subcatBadgeClass(sub) {
-  if (sub === "PU bo'lim")  return 'badge-pu';
-  if (sub === "TEP bo'lim") return 'badge-tep';
-  return 'badge-um';
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPassword').value;
+  const errEl=document.getElementById('loginError');
+  const btn=document.getElementById('loginBtn');
+  errEl.textContent='';
+  if(!email||!pass){errEl.textContent='Email va parol kiriting';return;}
+  btn.textContent='Kirilmoqda...';btn.disabled=true;
+  const{data,error}=await supabase.auth.signInWithPassword({email,password:pass});
+  if(error){errEl.textContent='Email yoki parol xato';btn.textContent='Kirish';btn.disabled=false;return;}
+  currentUser=data.user;showApp();await loadAll();
+  btn.textContent='Kirish';btn.disabled=false;
 }
-
-// ─── INIT ───────────────────────────────────────────────────
-async function init() {
-  if (!Auth.isLoggedIn()) { renderLogin(); return; }
-  S.params = await API.getParams().catch(() => []);
-  renderApp();
-  showPage('kiritish');
+function showLogin(){document.getElementById('loginOverlay').classList.remove('hidden');document.getElementById('app').classList.add('hidden');document.getElementById('loginPassword').value='';}
+function showApp(){document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('userDisplay').textContent=currentUser?.email||'';}
+async function loadAll(){await loadParams();await loadEntries();}
+async function loadParams(){
+  const{data,error}=await supabase.from('params').select('*').eq('active',true).order('sort_order');
+  if(error){showToast('Parametrlar yuklanmadi','error');return;}
+  params=data||[];renderParams();
 }
-
-// ─── LOGIN ──────────────────────────────────────────────────
-function renderLogin() {
-  document.getElementById('loginPage').style.display = 'flex';
-  document.getElementById('appPage').style.display   = 'none';
+async function loadEntries(){
+  const{data,error}=await supabase.from('entries').select('*').eq('entry_date',currentDate);
+  if(error)return;
+  entries={};
+  (data||[]).forEach(e=>{entries[e.param_id]=e;});
+  updateTodayList();
 }
-
-function renderApp() {
-  document.getElementById('loginPage').style.display = 'none';
-  document.getElementById('appPage').style.display   = 'flex';
+async function saveValue(){
+  if(!activeParam){showToast('Avval parametr tanlang','error');return;}
+  const val=document.getElementById('valueInput').value.trim();
+  if(val===''){showToast('Qiymat kiriting','error');return;}
+  const{data,error}=await supabase.from('entries').upsert({param_id:activeParam.id,value:parseFloat(val),entry_date:currentDate,created_by:currentUser.id},{onConflict:'param_id,entry_date'}).select().single();
+  if(error){showToast('Saqlashda xatolik','error');return;}
+  entries[activeParam.id]=data;
+  renderParams(document.getElementById('searchInput').value.toLowerCase());
+  updateTodayList();
+  showToast('Saqlandi ✓','success');
+  const idx=params.findIndex(p=>p.id===activeParam.id);
+  if(idx<params.length-1)selectParam(params[idx+1]);
 }
-
-async function handleLogin(e) {
-  e.preventDefault();
-  const username = document.getElementById('loginUser').value.trim();
-  const password = document.getElementById('loginPass').value;
-  const errEl    = document.getElementById('loginErr');
-  errEl.textContent = '';
-  try {
-    await Auth.login(username, password);
-    S.params = await API.getParams().catch(() => []);
-    renderApp();
-    showPage('kiritish');
-  } catch (err) {
-    errEl.textContent = err.message;
-  }
-}
-
-// ─── NAVIGATION ─────────────────────────────────────────────
-function showPage(page) {
-  S.page    = page;
-  S.selected = null;
-
-  document.querySelectorAll('.nav-item').forEach(el =>
-    el.classList.toggle('active', el.dataset.page === page)
-  );
-
-  const isKiritish = page === 'kiritish';
-  document.getElementById('pageKiritish').style.display  = isKiritish ? 'flex' : 'none';
-  document.getElementById('pageTahlil').style.display    = isKiritish ? 'none' : 'flex';
-  document.getElementById('searchBlock').style.display   = isKiritish ? '' : 'none';
-  document.getElementById('pageTitle').textContent       = isKiritish ? 'Ishlab chiqarish' : 'Tahlil';
-
-  if (isKiritish) { resetInputPanel(); loadKiritish(); }
-  else              loadTahlil();
-}
-
-function onDateChange(val) {
-  S.date     = val;
-  S.selected = null;
-  resetInputPanel();
-  if (S.page === 'kiritish') loadKiritish();
-  else                        loadTahlil();
-}
-
-function setPeriod(period, el) {
-  S.period = period;
-  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  loadTahlil();
-}
-
-// ─── KIRITISH ───────────────────────────────────────────────
-async function loadKiritish() {
-  const data = await API.getFacts(S.date).catch(() => ({ facts: [] }));
-  S.facts[S.date] = {};
-  (data.facts || []).forEach(f => {
-    S.facts[S.date][f.param_name] = { id: f.id, value: f.value, unit: f.unit };
+function renderParams(filter=''){
+  const container=document.getElementById('paramsList');
+  container.innerHTML='';
+  const sections={};
+  params.forEach(p=>{
+    if(filter&&!p.name.toLowerCase().includes(filter))return;
+    const s=p.section||'Umumiy';
+    if(!sections[s])sections[s]=[];
+    sections[s].push(p);
   });
-  renderList();
-}
-
-function renderList() {
-  const q   = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
-  const df  = S.facts[S.date] || {};
-  const out = document.getElementById('paramList');
-  let html  = '', any = false;
-
-  S.params.forEach(cat => {
-    const matchedSubcats = cat.subcats
-      .map(sub => ({
-        ...sub,
-        items: sub.items.filter(it => !q || it.toLowerCase().includes(q))
-      }))
-      .filter(sub => sub.items.length > 0);
-
-    if (!matchedSubcats.length) return;
-    any = true;
-
-    html += `<div class="cat-header">${cat.cat}</div>`;
-
-    matchedSubcats.forEach(sub => {
-      html += `<div class="subcat-label">${sub.name}</div>`;
-      sub.items.forEach(it => {
-        const f   = df[it];
-        const sel = S.selected === it;
-        html += `
-          <div class="param-row${sel ? ' selected' : ''}" onclick="selectParam('${esc(it)}','${esc(cat.cat)}','${esc(sub.name)}')">
-            <span class="param-name">${it}</span>
-            ${f ? `<span class="fact-badge">✓ ${f.value} ${f.unit}</span>` : ''}
-          </div>`;
-      });
+  if(!Object.keys(sections).length){container.innerHTML='<p class="loading">Topilmadi</p>';return;}
+  Object.entries(sections).forEach(([sec,list])=>{
+    const secEl=document.createElement('div');
+    secEl.innerHTML=`<div class="param-section-title">${sec}</div>`;
+    list.forEach(p=>{
+      const e=entries[p.id];
+      const item=document.createElement('div');
+      item.className='param-item'+(activeParam?.id===p.id?' active':'');
+      item.innerHTML=`<span class="param-dot"></span><span>${p.name}</span>${e?`<span class="param-badge">${e.value} ${p.unit||''}</span>`:''}`;
+      item.addEventListener('click',()=>selectParam(p));
+      secEl.appendChild(item);
     });
+    container.appendChild(secEl);
   });
-
-  out.innerHTML = any ? html : '<div class="no-result">Topilmadi</div>';
 }
-
-function selectParam(name, cat, subcat) {
-  S.selected = name;
-  const f = (S.facts[S.date] || {})[name];
-
-  document.getElementById('inputPanel').innerHTML = `
-    <div class="ip-subcat"><span class="badge ${subcatBadgeClass(subcat)}">${subcat}</span></div>
-    <div class="ip-name">${name}</div>
-    <div class="ip-row">
-      <input type="number" id="factValue" class="fact-input"
-             placeholder="Qiymat..." value="${f ? f.value : ''}">
-      <select id="unitSel" class="unit-sel">
-        ${['gramm','kg','tonna','dona','soat','daqiqa','%','kishi']
-          .map(u => `<option${f && f.unit === u ? ' selected' : ''}>${u}</option>`).join('')}
-      </select>
-    </div>
-    <button class="save-btn" id="saveBtn"
-            onclick="saveFact('${esc(name)}','${esc(cat)}','${esc(subcat)}')">
-      ✓ Saqlash
-    </button>
-    <div class="saved-title">Bu kun kiritilganlar</div>
-    <div id="savedFacts"></div>
-  `;
-
-  renderSaved();
-  renderList();
-  document.getElementById('factValue')?.focus();
-}
-
-function resetInputPanel() {
-  document.getElementById('inputPanel').innerHTML =
-    `<div class="ip-hint">👈 Ko'rsatkichni tanlang va qiymat kiriting</div>`;
-}
-
-async function saveFact(name, cat, subcat) {
-  const val  = document.getElementById('factValue')?.value.trim();
-  const unit = document.getElementById('unitSel')?.value;
-  if (!val) { alert('Qiymat kiriting!'); return; }
-
-  try {
-    const saved = await API.saveFact({
-      date: S.date,
-      param_name: name,
-      category: cat,
-      subcategory: subcat,
-      value: parseFloat(val),
-      unit,
-    });
-    if (!S.facts[S.date]) S.facts[S.date] = {};
-    S.facts[S.date][name] = { id: saved.id, value: saved.value, unit: saved.unit };
-    renderList();
-    renderSaved();
-    const btn = document.getElementById('saveBtn');
-    if (btn) {
-      btn.textContent = '✓ Saqlandi!';
-      btn.style.background = '#2e7d32';
-      setTimeout(() => { btn.textContent = '✓ Saqlash'; btn.style.background = ''; }, 1000);
-    }
-  } catch (err) { alert(err.message); }
-}
-
-async function deleteFact(id, name) {
-  await API.deleteFact(id).catch(() => {});
-  if (S.facts[S.date]) delete S.facts[S.date][name];
-  if (S.selected === name) resetInputPanel();
-  renderList();
-}
-
-function renderSaved() {
-  const el      = document.getElementById('savedFacts');
-  if (!el) return;
-  const entries = Object.entries(S.facts[S.date] || {});
-  el.innerHTML  = entries.length
-    ? entries.map(([k, v]) => `
-        <div class="saved-row">
-          <span class="saved-row-name" title="${k}">${k.length > 22 ? k.slice(0,20) + '…' : k}</span>
-          <span class="saved-row-val">${v.value} ${v.unit}</span>
-          <span class="saved-row-del" onclick="deleteFact(${v.id},'${esc(k)}')">×</span>
-        </div>`).join('')
-    : '<div class="saved-empty">Hali kiritilmagan</div>';
-}
-
-// ─── TAHLIL ─────────────────────────────────────────────────
-async function loadTahlil() {
-  const data = await API.getSummary(S.period, S.date).catch(() => ({ facts: [], dates: [] }));
-  renderTahlil(data);
-}
-
-function renderTahlil(data) {
-  const facts = data.facts || [];
-  const wrap  = document.getElementById('tahlilContent');
-
-  if (!facts.length) {
-    wrap.innerHTML = `<div class="empty-state">📭<br>Bu davr uchun ma'lumot yo'q</div>`;
-    return;
-  }
-
-  const bySubcat = {};
-  facts.forEach(f => {
-    if (!bySubcat[f.subcategory]) bySubcat[f.subcategory] = [];
-    bySubcat[f.subcategory].push(f);
+function selectParam(p){
+  activeParam=p;
+  document.querySelectorAll('.param-item').forEach(el=>{
+    const nameEl=el.querySelector('span:nth-child(2)');
+    if(nameEl&&nameEl.textContent===p.name)el.classList.add('active');
+    else el.classList.remove('active');
   });
-
-  wrap.innerHTML = `
-    <div class="stat-row">
-      <div class="stat-card">
-        <div class="sc-label">Jami kiritilgan</div>
-        <div class="sc-val">${facts.length}<span class="sc-unit">ta</span></div>
-      </div>
-      ${Object.entries(bySubcat).map(([sub, items]) => `
-        <div class="stat-card">
-          <div class="sc-label">${sub}</div>
-          <div class="sc-val">${items.length}<span class="sc-unit">ta</span></div>
-        </div>`).join('')}
-    </div>
-
-    <div class="tahlil-card">
-      <div class="tahlil-card-header">
-        <span class="tahlil-card-title">Barcha ko'rsatkichlar</span>
-        <span class="tahlil-card-sub">${facts.length} ta yozuv</span>
-      </div>
-      <table class="t-table">
-        <thead><tr>
-          <th>#</th>
-          <th>Ko'rsatkich</th>
-          <th>Bo'lim</th>
-          ${S.period !== 'daily' ? '<th>Sana</th>' : ''}
-          <th>Fakt</th>
-        </tr></thead>
-        <tbody>
-          ${facts.map((f, i) => `
-            <tr>
-              <td class="t-num">${i + 1}</td>
-              <td>${f.param_name}</td>
-              <td><span class="badge ${subcatBadgeClass(f.subcategory)}">${f.subcategory}</span></td>
-              ${S.period !== 'daily' ? `<td class="t-date">${f.date}</td>` : ''}
-              <td><b>${f.value}</b> <span class="t-unit">${f.unit}</span></td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-
-    <div class="tahlil-card" style="margin-top:12px">
-      <div class="tahlil-card-header">
-        <span class="tahlil-card-title">Grafik</span>
-      </div>
-      <div style="padding:16px 16px 8px">
-        <canvas id="mainChart" height="90"></canvas>
-      </div>
-    </div>`;
-
-  const labels = facts.map(f =>
-    f.param_name.length > 18 ? f.param_name.slice(0, 16) + '…' : f.param_name
-  );
-  Charts.renderBar('mainChart', labels, facts.map(f => parseFloat(f.value)));
+  document.getElementById('inputSectionLabel').textContent=p.section||'';
+  document.getElementById('activeParamName').textContent=p.name;
+  document.getElementById('unitLabel').textContent=p.unit||'—';
+  const existing=entries[p.id];
+  const input=document.getElementById('valueInput');
+  input.value=existing?existing.value:'';
+  input.focus();
+  if(window.innerWidth<=560)document.getElementById('inputPanel').scrollIntoView({behavior:'smooth'});
 }
-
-// ─── BOOT ───────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', init);
+function updateTodayList(){
+  const list=document.getElementById('todayList');
+  const filled=Object.values(entries);
+  if(!filled.length){list.innerHTML='<span class="empty-hint">Hali kiritilmagan</span>';return;}
+  list.innerHTML=filled.map(e=>{const p=params.find(x=>x.id===e.param_id);return`<div class="today-entry"><div class="today-entry-name">${p?.name||''}</div><div class="today-entry-val">${e.value} ${p?.unit||''}</div></div>`;}).join('');
+}
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  setTimeout(()=>{t.className='toast';},2500);
+}

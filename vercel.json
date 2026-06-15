@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "name": "rnp-dashboard",
+  "builds": [
+    { "src": "frontend/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/frontend/$1" }
+  ]
+}
