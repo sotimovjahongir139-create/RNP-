@@ -94,6 +94,7 @@ async function doLogin(){
   const btn=document.getElementById('loginBtn');
   errEl.textContent='';
   if(!email||!pass){errEl.textContent='Email va parol kiriting';return;}
+  console.log('Login attempt email:',JSON.stringify(email),'pass length:',pass.length,'codes:',Array.from(pass).map(c=>c.charCodeAt(0)));
   btn.textContent='Kirilmoqda...';btn.disabled=true;
   try{
     const{data,error}=await sbLogin(email,pass);
@@ -104,6 +105,18 @@ async function doLogin(){
   }finally{
     btn.textContent='Kirish';btn.disabled=false;
   }
+}
+
+async function adminDirectLogin(){
+  const errEl=document.getElementById('loginError');
+  errEl.textContent='Kirilmoqda...';
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:'{"email":"admin@rnp.uz","password":"Admin123!"}'});
+    const d=await r.json();
+    console.log('Direct admin login:',r.status,d);
+    if(r.ok){localStorage.setItem('rnp_token',d.access_token);localStorage.setItem('rnp_user',JSON.stringify(d.user));currentUser=d.user;showApp();await loadAll();}
+    else{errEl.textContent='Xato: '+JSON.stringify(d);}
+  }catch(e){errEl.textContent='Network: '+e.message;}
 }
 
 async function doRegister(){
