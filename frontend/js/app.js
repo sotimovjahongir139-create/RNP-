@@ -20,11 +20,18 @@ async function sbLogin(email,password){
   try{
     const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
     const d=await r.json();
-    if(!r.ok)return{error:{message:d.error_description||d.msg||'Login yoki parol xato'}};
+    console.log('Login response',r.status,d);
+    if(!r.ok){
+      const msg=d.error_description||d.msg||d.message||JSON.stringify(d);
+      return{error:{message:msg+' ('+r.status+')'}};
+    }
     localStorage.setItem('rnp_token',d.access_token);
     localStorage.setItem('rnp_user',JSON.stringify(d.user));
     return{data:{user:d.user}};
-  }catch(e){return{error:{message:'Tarmoq xatosi: '+e.message}};}
+  }catch(e){
+    console.error('Login fetch error',e);
+    return{error:{message:'Tarmoq xatosi: '+e.message}};
+  }
 }
 
 async function sbGet(table,filters={}){
