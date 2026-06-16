@@ -6,11 +6,19 @@
 <title>RNP</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--accent:#5b5fcf;--accent-d:#4a4eb8;--bg:#f0f2f5;--white:#fff;--sidebar-bg:#1a1d2e;--text:#1a1a2e;--muted:#6b7280;--border:#e5e7eb;--r:8px;--sidebar-w:210px;--topbar-h:52px;}
+:root{
+  --accent:#5b5fcf;--accent-d:#4a4eb8;
+  --bg:#f0f2f5;--white:#fff;
+  --sidebar-bg:#1a1d2e;
+  --text:#1a1a2e;--muted:#6b7280;--border:#e5e7eb;--r:8px;
+  --sidebar-w:210px;--topbar-h:52px;
+}
 html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:var(--bg);color:var(--text)}
 .hidden{display:none!important}
+
+/* LOGIN */
 .login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1d2e,#2d2f52);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
-.login-card{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-card{background:#fff;border-radius:16px;padding:2rem 2rem;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
 .login-logo{font-size:2rem;font-weight:800;color:var(--accent);text-align:center;letter-spacing:4px;margin-bottom:4px}
 .login-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:1.5rem}
 .fg{margin-bottom:1rem}
@@ -20,7 +28,11 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .err{color:#ef4444;font-size:12px;min-height:18px;margin-bottom:6px}
 .btn-primary{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;cursor:pointer}
 .btn-primary:active{background:var(--accent-d)}
+
+/* APP */
 .app{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
 .sidebar-overlay.on{display:block}
 .sidebar{width:var(--sidebar-w);background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;z-index:200;transition:transform .25s}
@@ -35,42 +47,53 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;gap:8px}
 .user-email{color:rgba(200,202,216,.6);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .btn-out{background:none;border:1px solid rgba(255,255,255,.2);color:#c8cad8;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;white-space:nowrap}
+
+/* MAIN */
 .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .topbar{height:var(--topbar-h);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 14px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .menu-btn{display:none;background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);padding:2px;line-height:1}
 .page-title{font-size:15px;font-weight:700;white-space:nowrap}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
-.date-input,.search-input{border:1.5px solid var(--border);border-radius:var(--r);padding:6px 10px;font-size:13px;outline:none;width:130px}
+.date-input{border:1.5px solid var(--border);border-radius:var(--r);padding:6px 10px;font-size:13px;outline:none;width:130px}
+.search-input{border:1.5px solid var(--border);border-radius:var(--r);padding:6px 10px;font-size:13px;outline:none;width:130px}
 .date-input:focus,.search-input:focus{border-color:var(--accent)}
+
+/* PAGES */
 .page{display:none;flex:1;overflow:hidden;flex-direction:row}
 .page.active-page{display:flex}
+
+/* PRODUCTION PAGE */
 .params-panel{flex:1;overflow-y:auto;background:#fff;border-right:1px solid var(--border);min-width:0}
 .sec-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;padding:10px 16px 4px;text-transform:uppercase}
 .param-item{display:flex;align-items:center;padding:10px 16px;cursor:pointer;font-size:13px;border-left:3px solid transparent;transition:background .1s;line-height:1.3}
 .param-item:hover{background:#f5f6ff}
 .param-item.active{background:rgba(91,95,207,.1);color:var(--accent);border-left-color:var(--accent);font-weight:600}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--border);margin-right:10px;flex-shrink:0}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);margin-right:10px;flex-shrink:0;transition:background .1s}
 .param-item.active .dot{background:var(--accent)}
 .pname{flex:1;min-width:0}
 .badge{margin-left:8px;font-size:11px;font-weight:600;color:var(--accent);background:rgba(91,95,207,.1);border-radius:10px;padding:2px 8px;white-space:nowrap;flex-shrink:0}
-.input-panel{width:280px;flex-shrink:0;background:#f7f8ff;border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+
+/* INPUT PANEL */
+.input-panel{width:300px;flex-shrink:0;background:#f7f8ff;border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
 .ip-inner{padding:16px}
 .ip-sec{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
 .ip-name{font-size:14px;font-weight:600;margin-bottom:16px;min-height:40px;line-height:1.4;color:var(--text)}
-.input-row{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.val-input{flex:1;min-width:0;padding:11px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:16px;outline:none;background:#fff}
+.input-row{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.val-input{width:100%;padding:13px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:18px;outline:none;background:#fff}
 .val-input:focus{border-color:var(--accent)}
-.unit{font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;min-width:36px}
-.btn-save{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:20px}
-.btn-save:active{background:var(--accent-d)}
+.unit{font-size:13px;font-weight:600;color:var(--muted);padding:0 2px}
+.btn-save{width:100%;padding:13px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:20px;transition:background .2s}
+.btn-save:active{background:var(--accent-d);transform:scale(.98)}
 .today-lbl{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
 .today-list{display:flex;flex-direction:column;gap:6px}
 .t-entry{background:#fff;border:1px solid var(--border);border-radius:6px;padding:8px 10px}
 .t-name{color:var(--muted);font-size:11px;margin-bottom:2px}
 .t-val{font-weight:700;color:var(--accent);font-size:14px}
 .hint{font-size:12px;color:var(--muted)}
+
+/* ANALYTICS PAGE */
 .analytics-wrap{flex:1;overflow-y:auto;padding:20px;background:var(--bg)}
-.analytics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px}
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px}
 .stat-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
 .stat-card-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
 .stat-card-val{font-size:28px;font-weight:800;color:var(--accent)}
@@ -87,18 +110,47 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
 .analytics-date-row label{font-size:13px;font-weight:600;color:var(--muted)}
 .analytics-date-row input{border:1.5px solid var(--border);border-radius:var(--r);padding:7px 10px;font-size:13px;outline:none}
 .analytics-date-row input:focus{border-color:var(--accent)}
-.btn-load{padding:9px 20px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
+.btn-load{padding:8px 18px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer}
+
+/* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1d2e;color:#fff;padding:10px 24px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:transform .3s,opacity .3s;z-index:999;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast.ok{background:#166534}
 .toast.er{background:#991b1b}
-@media(max-width:900px){.input-panel{width:240px}.search-input{width:100px}}
-@media(max-width:720px){.sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sidebar-close-btn{display:block}.menu-btn{display:block}.input-panel{width:220px}.search-input{width:90px}.date-input{width:110px}}
-@media(max-width:580px){.page{flex-direction:column}.params-panel{flex:none;height:42vh;border-right:none;border-bottom:1px solid var(--border);overflow-y:auto}.input-panel{width:100%;flex:1;border-left:none;border-top:1px solid var(--border)}.ip-inner{padding:14px}.search-input{width:80px}.date-input{width:100px}.analytics-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:380px){.date-input{display:none}.search-input{width:70px}.analytics-grid{grid-template-columns:1fr}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .input-panel{width:240px}
+  .search-input{width:100px}
+}
+@media(max-width:720px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-close-btn{display:block}
+  .menu-btn{display:block}
+  .input-panel{width:220px}
+  .search-input{width:90px}
+  .date-input{width:110px}
+}
+@media(max-width:580px){
+  .page{flex-direction:column}
+  .params-panel{flex:none;height:42vh;border-right:none;border-bottom:1px solid var(--border);overflow-y:auto}
+  .input-panel{width:100%;flex:1;border-left:none;border-top:1px solid var(--border)}
+  .ip-inner{padding:14px}
+  .search-input{width:80px}
+  .date-input{width:100px}
+  .analytics-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:380px){
+  .date-input{display:none}
+  .search-input{width:70px}
+  .analytics-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
+
+<!-- LOGIN -->
 <div id="loginOverlay" class="login-overlay">
   <div class="login-card">
     <div class="login-logo">RNP</div>
@@ -109,10 +161,15 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
     <button id="lBtn" class="btn-primary">Kirish</button>
   </div>
 </div>
+
+<!-- APP -->
 <div id="app" class="app hidden">
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header"><span class="logo">RNP</span><button class="sidebar-close-btn" id="sidebarCloseBtn">✕</button></div>
+    <div class="sidebar-header">
+      <span class="logo">RNP</span>
+      <button class="sidebar-close-btn" id="sidebarCloseBtn">✕</button>
+    </div>
     <nav class="sidebar-nav">
       <span class="nav-label">ISHLAB CHIQARISH</span>
       <a href="#" class="nav-item active" data-page="production">📋 Ishlab chiqarish</a>
@@ -124,6 +181,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
       <button class="btn-out" id="logoutBtn">Chiqish</button>
     </div>
   </aside>
+
   <div class="main-wrap">
     <header class="topbar">
       <button class="menu-btn" id="menuBtn">☰</button>
@@ -133,6 +191,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
         <input type="text" id="searchInput" placeholder="Qidirish..." class="search-input">
       </div>
     </header>
+
+    <!-- PRODUCTION PAGE -->
     <div class="page active-page" id="page-production">
       <div class="params-panel"><div id="paramsList"></div></div>
       <div class="input-panel">
@@ -149,6 +209,8 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
         </div>
       </div>
     </div>
+
+    <!-- ANALYTICS PAGE -->
     <div class="page" id="page-analytics">
       <div class="analytics-wrap">
         <div class="analytics-date-row">
@@ -165,13 +227,20 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sa
     </div>
   </div>
 </div>
+
 <div id="toast" class="toast"></div>
+
 <script>
 const SB='https://tzfwlailknlxwdgxvxrc.supabase.co';
 const AK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6ZndsYWlsa25seHdkZ3h2eHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1Mzg2NDYsImV4cCI6MjA5NzExNDY0Nn0.fPdICmSn18Diq3IuDCzSYPj1jnyPShFPJFY0PbJGsso';
-let user=null,allParams=[],allEntries={},active=null,curDate=new Date().toISOString().split('T')[0];
+
+let user=null,allParams=[],allEntries={},active=null;
+let curDate=new Date().toISOString().split('T')[0];
+
 function tok(){return localStorage.getItem('rnp_t')||AK;}
 function hdr(){return{'Content-Type':'application/json','apikey':AK,'Authorization':'Bearer '+tok()};}
+
+// INIT
 window.addEventListener('DOMContentLoaded',function(){
   document.getElementById('dateInput').value=curDate;
   document.getElementById('aDate').value=curDate;
@@ -180,16 +249,22 @@ window.addEventListener('DOMContentLoaded',function(){
   if(u){user=JSON.parse(u);showApp();loadAll();}
   else showLogin();
 });
+
 function bindEvents(){
+  // Login
   document.getElementById('lBtn').onclick=doLogin;
   document.getElementById('lPass').onkeydown=function(e){if(e.key==='Enter')doLogin();};
   document.getElementById('logoutBtn').onclick=doLogout;
+
+  // Sidebar
   const sidebar=document.getElementById('sidebar');
   const overlay=document.getElementById('sidebarOverlay');
   document.getElementById('menuBtn').onclick=function(){sidebar.classList.add('open');overlay.classList.add('on');};
   function closeSB(){sidebar.classList.remove('open');overlay.classList.remove('on');}
   document.getElementById('sidebarCloseBtn').onclick=closeSB;
   overlay.onclick=closeSB;
+
+  // Nav
   document.querySelectorAll('.nav-item').forEach(function(item){
     item.onclick=function(e){
       e.preventDefault();
@@ -203,12 +278,27 @@ function bindEvents(){
       if(page==='analytics')loadAnalytics();
     };
   });
-  document.getElementById('dateInput').onchange=function(){curDate=this.value;loadEntries();};
-  document.getElementById('searchInput').oninput=function(){renderParams(this.value.toLowerCase());};
+
+  // Date
+  document.getElementById('dateInput').onchange=function(){
+    curDate=this.value;
+    loadEntries();
+  };
+
+  // Search
+  document.getElementById('searchInput').oninput=function(){
+    renderParams(this.value.toLowerCase());
+  };
+
+  // Save
   document.getElementById('saveBtn').onclick=saveValue;
   document.getElementById('valInput').onkeydown=function(e){if(e.key==='Enter')saveValue();};
+
+  // Analytics load
   document.getElementById('aLoadBtn').onclick=loadAnalytics;
 }
+
+// AUTH
 async function doLogin(){
   const email=document.getElementById('lEmail').value.trim();
   const pass=document.getElementById('lPass').value;
@@ -218,7 +308,11 @@ async function doLogin(){
   if(!email||!pass){errEl.textContent='Email va parol kiriting';return;}
   btn.textContent='Kirilmoqda...';btn.disabled=true;
   try{
-    const r=await fetch(SB+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':AK},body:JSON.stringify({email:email,password:pass})});
+    const r=await fetch(SB+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':AK},
+      body:JSON.stringify({email:email,password:pass})
+    });
     const d=await r.json();
     if(!r.ok){errEl.textContent=d.error_description||d.msg||'Login yoki parol xato';return;}
     localStorage.setItem('rnp_t',d.access_token);
@@ -227,17 +321,37 @@ async function doLogin(){
   }catch(ex){errEl.textContent='Xato: '+ex.message;}
   finally{btn.textContent='Kirish';btn.disabled=false;}
 }
-function doLogout(){localStorage.removeItem('rnp_t');localStorage.removeItem('rnp_u');user=null;allParams=[];allEntries={};active=null;showLogin();}
-function showLogin(){document.getElementById('loginOverlay').classList.remove('hidden');document.getElementById('app').classList.add('hidden');document.getElementById('lPass').value='';document.getElementById('lErr').textContent='';}
-function showApp(){document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('uEmail').textContent=user?user.email:'';}
+
+function doLogout(){
+  localStorage.removeItem('rnp_t');localStorage.removeItem('rnp_u');
+  user=null;allParams=[];allEntries={};active=null;
+  showLogin();
+}
+
+function showLogin(){
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('lPass').value='';
+  document.getElementById('lErr').textContent='';
+}
+function showApp(){
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('uEmail').textContent=user?user.email:'';
+}
+
+// DATA
 async function loadAll(){await loadParams();await loadEntries();}
+
 async function loadParams(){
   try{
     const r=await fetch(SB+'/rest/v1/params?select=*&active=eq.true&order=sort_order',{headers:hdr()});
     const d=await r.json();
-    allParams=Array.isArray(d)?d:[];renderParams();
-  }catch(ex){toast('Yuklanmadi','er');}
+    allParams=Array.isArray(d)?d:[];
+    renderParams();
+  }catch(ex){toast('Parametrlar yuklanmadi','er');}
 }
+
 async function loadEntries(){
   try{
     const r=await fetch(SB+'/rest/v1/entries?select=*&entry_date=eq.'+curDate,{headers:hdr()});
@@ -248,57 +362,87 @@ async function loadEntries(){
     updateToday();
   }catch(ex){}
 }
+
 async function saveValue(){
   if(!active){toast('Avval parametr tanlang','er');return;}
   const val=document.getElementById('valInput').value.trim();
   if(!val){toast('Qiymat kiriting','er');return;}
   try{
-    const r=await fetch(SB+'/rest/v1/entries?on_conflict=param_id,entry_date',{method:'POST',headers:Object.assign({},hdr(),{'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify({param_id:active.id,value:parseFloat(val),entry_date:curDate,created_by:user.id})});
+    const body={param_id:active.id,value:parseFloat(val),entry_date:curDate,created_by:user.id};
+    const r=await fetch(SB+'/rest/v1/entries?on_conflict=param_id,entry_date',{
+      method:'POST',
+      headers:Object.assign({},hdr(),{'Prefer':'resolution=merge-duplicates,return=representation'}),
+      body:JSON.stringify(body)
+    });
     const d=await r.json();
     if(!r.ok){toast('Xato: '+(d.message||JSON.stringify(d)),'er');return;}
     const item=Array.isArray(d)?d[0]:d;
     allEntries[active.id]=item;
     renderParams(document.getElementById('searchInput').value.toLowerCase());
-    updateToday();toast('Saqlandi ✓','ok');
+    updateToday();
+    toast('Saqlandi ✓','ok');
     const idx=allParams.findIndex(function(p){return p.id===active.id;});
     if(idx<allParams.length-1)selectParam(allParams[idx+1]);
   }catch(ex){toast('Xato: '+ex.message,'er');}
 }
+
+// RENDER
 function renderParams(filter){
   filter=filter||'';
-  const c=document.getElementById('paramsList');c.innerHTML='';
+  const c=document.getElementById('paramsList');
+  c.innerHTML='';
   const secs={};
-  allParams.forEach(function(p){if(filter&&p.name.toLowerCase().indexOf(filter)<0)return;const s=p.section||'Umumiy';if(!secs[s])secs[s]=[];secs[s].push(p);});
+  allParams.forEach(function(p){
+    if(filter&&p.name.toLowerCase().indexOf(filter)<0)return;
+    const s=p.section||'Umumiy';
+    if(!secs[s])secs[s]=[];
+    secs[s].push(p);
+  });
   const keys=Object.keys(secs);
   if(!keys.length){c.innerHTML='<div style="padding:20px;color:#999;font-size:13px">Topilmadi</div>';return;}
   keys.forEach(function(sec){
     const wrap=document.createElement('div');
-    const title=document.createElement('div');title.className='sec-title';title.textContent=sec;wrap.appendChild(title);
+    const title=document.createElement('div');
+    title.className='sec-title';title.textContent=sec;
+    wrap.appendChild(title);
     secs[sec].forEach(function(p){
-      const e=allEntries[p.id];const item=document.createElement('div');
+      const e=allEntries[p.id];
+      const item=document.createElement('div');
       item.className='param-item'+(active&&active.id===p.id?' active':'');
       item.innerHTML='<span class="dot"></span><span class="pname">'+p.name+'</span>'+(e?'<span class="badge">'+e.value+' '+(p.unit||'')+'</span>':'');
-      item.onclick=function(){selectParam(p);};wrap.appendChild(item);
+      item.onclick=function(){selectParam(p);};
+      wrap.appendChild(item);
     });
     c.appendChild(wrap);
   });
 }
+
 function selectParam(p){
   active=p;
   document.getElementById('ipSec').textContent=p.section||'';
   document.getElementById('ipName').textContent=p.name;
   document.getElementById('unitLbl').textContent=p.unit||'—';
-  const e=allEntries[p.id];const inp=document.getElementById('valInput');
+  const e=allEntries[p.id];
+  const inp=document.getElementById('valInput');
   inp.value=e?e.value:'';
   renderParams(document.getElementById('searchInput').value.toLowerCase());
   inp.focus();
-  if(window.innerWidth<=580)document.querySelector('.input-panel').scrollIntoView({behavior:'smooth',block:'start'});
+  if(window.innerWidth<=580){
+    document.querySelector('.input-panel').scrollIntoView({behavior:'smooth',block:'start'});
+  }
 }
+
 function updateToday(){
-  const l=document.getElementById('todayList');const items=Object.values(allEntries);
+  const l=document.getElementById('todayList');
+  const items=Object.values(allEntries);
   if(!items.length){l.innerHTML='<span class="hint">Hali kiritilmagan</span>';return;}
-  l.innerHTML=items.map(function(e){const p=allParams.find(function(x){return x.id===e.param_id;});return'<div class="t-entry"><div class="t-name">'+(p?p.name:'')+'</div><div class="t-val">'+e.value+' '+(p&&p.unit?p.unit:'')+'</div></div>';}).join('');
+  l.innerHTML=items.map(function(e){
+    const p=allParams.find(function(x){return x.id===e.param_id;});
+    return '<div class="t-entry"><div class="t-name">'+(p?p.name:'')+'</div><div class="t-val">'+e.value+' '+(p&&p.unit?p.unit:'')+'</div></div>';
+  }).join('');
 }
+
+// ANALYTICS
 async function loadAnalytics(){
   const aDate=document.getElementById('aDate').value||curDate;
   const cards=document.getElementById('analyticsCards');
@@ -310,13 +454,33 @@ async function loadAnalytics(){
     const entries=await r.json();
     if(!Array.isArray(entries)||!entries.length){
       cards.innerHTML='<div style="grid-column:1/-1;padding:24px;text-align:center;color:#999">'+aDate+' kuni ma\'lumot kiritilmagan</div>';
-      tableWrap.innerHTML='<div class="analytics-empty">Ma\'lumot topilmadi</div>';return;
+      tableWrap.innerHTML='<div class="analytics-empty">Ma\'lumot topilmadi</div>';
+      return;
     }
-    cards.innerHTML=entries.slice(0,6).map(function(e){const p=allParams.find(function(x){return x.id===e.param_id;});return'<div class="stat-card"><div class="stat-card-title">'+(p?p.name:e.param_id)+'</div><div><span class="stat-card-val">'+e.value+'</span><span class="stat-card-unit">'+(p&&p.unit?p.unit:'')+'</span></div></div>';}).join('');
-    tableWrap.innerHTML='<table class="analytics-table"><thead><tr><th>#</th><th>Parametr</th><th>Qiymat</th><th>Birlik</th></tr></thead><tbody>'+entries.map(function(e,i){const p=allParams.find(function(x){return x.id===e.param_id;});return'<tr><td>'+(i+1)+'</td><td>'+(p?p.name:e.param_id)+'</td><td><strong>'+e.value+'</strong></td><td>'+(p&&p.unit?p.unit:'')+'</td></tr>';}).join('')+'</tbody></table>';
-  }catch(ex){cards.innerHTML='<div style="grid-column:1/-1;padding:16px;color:#ef4444">Xato: '+ex.message+'</div>';}
+
+    // Cards — first 6
+    const cardItems=entries.slice(0,6);
+    cards.innerHTML=cardItems.map(function(e){
+      const p=allParams.find(function(x){return x.id===e.param_id;});
+      return '<div class="stat-card"><div class="stat-card-title">'+(p?p.name:e.param_id)+'</div><div><span class="stat-card-val">'+e.value+'</span><span class="stat-card-unit">'+(p&&p.unit?p.unit:'')+'</span></div></div>';
+    }).join('');
+
+    // Table — all
+    tableWrap.innerHTML='<table class="analytics-table"><thead><tr><th>#</th><th>Parametr</th><th>Qiymat</th><th>Birlik</th></tr></thead><tbody>'+
+    entries.map(function(e,i){
+      const p=allParams.find(function(x){return x.id===e.param_id;});
+      return '<tr><td>'+(i+1)+'</td><td>'+(p?p.name:e.param_id)+'</td><td><strong>'+e.value+'</strong></td><td>'+(p&&p.unit?p.unit:'')+'</td></tr>';
+    }).join('')+'</tbody></table>';
+  }catch(ex){
+    cards.innerHTML='<div style="grid-column:1/-1;padding:16px;color:#ef4444">Xato: '+ex.message+'</div>';
+  }
 }
-function toast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(type||'');clearTimeout(t._t);t._t=setTimeout(function(){t.className='toast';},3000);}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+(type||'');
+  clearTimeout(t._t);t._t=setTimeout(function(){t.className='toast';},3000);
+}
 </script>
 </body>
 </html>
