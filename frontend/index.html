@@ -93,7 +93,7 @@
 
     <div class="sidebar-section-label">Asosiy</div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item active">
+      <a href="#" class="nav-item active" data-page="production">
         <span class="nav-icon-wrap">
           <svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="2.5" width="6.667" height="6.667" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="10.833" y="2.5" width="6.667" height="6.667" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="2.5" y="10.833" width="6.667" height="6.667" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="10.833" y="10.833" width="6.667" height="6.667" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
         </span>
@@ -103,7 +103,7 @@
 
     <div class="sidebar-section-label">Hisobotlar</div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" data-page="analytics">
         <span class="nav-icon-wrap">
           <svg viewBox="0 0 20 20" fill="none"><path d="M2.5 15l5-5 3.333 3.333L15 7.5l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 17.5h15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         </span>
@@ -153,53 +153,170 @@
       </div>
     </header>
 
-    <!-- CONTENT -->
-    <div class="content-area">
+    <!-- PRODUCTION PAGE -->
+    <div id="productionPage" class="page-wrap">
+      <div class="content-area">
 
-      <!-- PARAM LIST -->
-      <div class="params-panel">
-        <div class="params-panel-header">
-          <span class="params-panel-title">Ko'rsatkichlar</span>
-          <span class="params-count" id="paramsCount"></span>
-        </div>
-        <div id="paramsList" class="params-list"></div>
-      </div>
-
-      <!-- INPUT PANEL -->
-      <div class="input-panel" id="inputPanel">
-        <div class="input-panel-inner">
-
-          <div class="entry-card">
-            <div class="entry-section-chip" id="inputSectionLabel">—</div>
-            <div class="entry-param-name" id="activeParamName">Ko'rsatkichni tanlang</div>
-            <label class="entry-input-label">Qiymat</label>
-            <div class="entry-input-row">
-              <input type="number" id="valueInput" class="value-input" placeholder="0" step="any" autocomplete="off">
-              <div class="unit-chip" id="unitLabel">—</div>
-            </div>
-            <p class="entry-key-hint">↵ Enter — tez saqlash</p>
-            <button id="saveBtn" class="btn-save">✓ Saqlash</button>
+        <!-- PARAM LIST -->
+        <div class="params-panel">
+          <div class="params-panel-header">
+            <span class="params-panel-title">Ko'rsatkichlar</span>
+            <span class="params-count" id="paramsCount"></span>
           </div>
-
-          <div class="today-section">
-            <div class="today-section-header">
-              <span class="today-section-title">Bugun kiritilganlar</span>
-              <span class="today-badge" id="todayCountBadge"></span>
-            </div>
-            <div id="todayList" class="today-list">
-              <span class="empty-hint">Hali kiritilmagan</span>
-            </div>
-          </div>
-
+          <div id="paramsList" class="params-list"></div>
         </div>
-      </div>
 
+        <!-- INPUT PANEL -->
+        <div class="input-panel" id="inputPanel">
+          <div class="input-panel-inner">
+
+            <div class="entry-card">
+              <div class="entry-section-chip" id="inputSectionLabel">—</div>
+              <div class="entry-param-name" id="activeParamName">Ko'rsatkichni tanlang</div>
+              <label class="entry-input-label">Qiymat</label>
+              <div class="entry-input-row">
+                <input type="number" id="valueInput" class="value-input" placeholder="0" step="any" autocomplete="off">
+                <div class="unit-chip" id="unitLabel">—</div>
+              </div>
+              <p class="entry-key-hint">↵ Enter — tez saqlash</p>
+              <button id="saveBtn" class="btn-save">✓ Saqlash</button>
+            </div>
+
+            <div class="today-section">
+              <div class="today-section-header">
+                <span class="today-section-title">Bugun kiritilganlar</span>
+                <span class="today-badge" id="todayCountBadge"></span>
+              </div>
+              <div id="todayList" class="today-list">
+                <span class="empty-hint">Hali kiritilmagan</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
     </div>
-  </div>
-</div>
+
+    <!-- ANALYTICS PAGE -->
+    <div id="analyticsPage" class="page-wrap analytics-page hidden">
+
+      <!-- Filter bar -->
+      <div class="an-filter-bar">
+        <div class="an-filter-tabs">
+          <button class="an-tab active" data-range="week">7 kun</button>
+          <button class="an-tab" data-range="30">30 kun</button>
+          <button class="an-tab" data-range="month">Bu oy</button>
+          <button class="an-tab" data-range="custom">Maxsus</button>
+        </div>
+        <div class="an-custom-range hidden" id="customRangeWrap">
+          <input type="date" id="analyticsFrom" class="date-input">
+          <span class="an-range-sep">—</span>
+          <input type="date" id="analyticsTo" class="date-input">
+          <button class="an-apply-btn" id="applyCustomRange">Ko'rish</button>
+        </div>
+        <span class="an-date-label" id="analyticsDateLabel"></span>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-indigo">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M3.333 5h13.334M3.333 10h13.334M3.333 15h8.334" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpiTotalEntries">—</div>
+            <div class="kpi-label">Jami kiritishlar</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-green">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M16.667 5L7.5 14.167 3.333 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpiFilledParams">—</div>
+            <div class="kpi-label">To'ldirilgan parametrlar</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-blue">
+            <svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 6.667v3.333l2.5 1.667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpiCompletion">—</div>
+            <div class="kpi-label">O'rtacha bajarilish</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-purple">
+            <svg viewBox="0 0 20 20" fill="none"><rect x="2.5" y="10" width="3" height="7.5" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="8.5" y="6.5" width="3" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="14.5" y="2.5" width="3" height="15" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpiActiveDays">—</div>
+            <div class="kpi-label">Faol kunlar</div>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon kpi-orange">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M2.5 10h15M2.5 10l4.167-4.167M2.5 10l4.167 4.167" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
+          </div>
+          <div class="kpi-body">
+            <div class="kpi-value" id="kpiAvgValue">—</div>
+            <div class="kpi-label">O'rtacha qiymat</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="charts-grid">
+        <div class="an-card chart-wide">
+          <div class="an-card-header">
+            <span class="an-card-title">Kunlik tendensiya</span>
+            <span class="an-card-sub" id="trendSub"></span>
+          </div>
+          <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+        </div>
+        <div class="an-card">
+          <div class="an-card-header">
+            <span class="an-card-title">Bo'limlar bo'yicha</span>
+            <span class="an-card-sub" id="sectionSub"></span>
+          </div>
+          <div class="chart-wrap"><canvas id="sectionChart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Analytics table -->
+      <div class="an-card">
+        <div class="an-card-header">
+          <span class="an-card-title">Kunlik hisobot</span>
+          <span class="an-card-sub" id="tableSubLabel"></span>
+        </div>
+        <div class="an-table-wrap">
+          <table class="an-table">
+            <thead>
+              <tr>
+                <th>Sana</th>
+                <th>Kiritishlar</th>
+                <th>Ko'rsatkichlar</th>
+                <th>Bajarilish</th>
+                <th>Holat</th>
+              </tr>
+            </thead>
+            <tbody id="analyticsTableBody">
+              <tr><td colspan="5" class="loading">Yuklanmoqda…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- end analyticsPage -->
+
+  </div><!-- end main-wrap -->
+</div><!-- end app -->
 
 <div id="toast" class="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@ function getToken(){return localStorage.getItem('rnp_token')||SB_KEY;}
 function authHeaders(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+getToken()};}
 
 let currentUser=null,params=[],entries={},activeParam=null,currentDate=today();
+let analyticsRange='week',chartTrend=null,chartSection=null,currentPage='production';
 
 async function sbSignup(email,password){
   try{
@@ -84,7 +85,9 @@ function bindUI(){
   const close=()=>{sidebar.classList.remove('open');overlay.classList.remove('active');};
   document.getElementById('sidebarClose').addEventListener('click',close);
   overlay.addEventListener('click',close);
-  document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',e=>{e.preventDefault();document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));item.classList.add('active');close();});});
+  document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',e=>{e.preventDefault();const pg=item.getAttribute('data-page')||'production';showPage(pg);close();});});
+  document.querySelectorAll('.an-tab').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.an-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');analyticsRange=btn.getAttribute('data-range');const cr=document.getElementById('customRangeWrap');cr.classList.toggle('hidden',analyticsRange!=='custom');if(analyticsRange!=='custom')loadAnalytics();});});
+  document.getElementById('applyCustomRange').addEventListener('click',loadAnalytics);
 }
 
 async function doLogin(){
@@ -211,4 +214,111 @@ function updateTodayList(){
 function showToast(msg,type=''){
   const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');
   setTimeout(()=>{t.className='toast';},4000);
+}
+
+/* ══════════ PAGE ROUTING ══════════ */
+function showPage(page){
+  currentPage=page;
+  const isProd=page==='production';
+  document.getElementById('productionPage').classList.toggle('hidden',!isProd);
+  document.getElementById('analyticsPage').classList.toggle('hidden',isProd);
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.getAttribute('data-page')===page));
+  if(page==='analytics')loadAnalytics();
+}
+
+/* ══════════ ANALYTICS ══════════ */
+function datesBetween(from,to){
+  const dates=[];const d=new Date(from);const end=new Date(to);
+  while(d<=end){dates.push(d.toISOString().split('T')[0]);d.setDate(d.getDate()+1);}
+  return dates;
+}
+
+function getAnalyticsRange(){
+  const toBase=today();
+  let from,to=toBase;
+  if(analyticsRange==='week'){const d=new Date();d.setDate(d.getDate()-6);from=d.toISOString().split('T')[0];}
+  else if(analyticsRange==='30'){const d=new Date();d.setDate(d.getDate()-29);from=d.toISOString().split('T')[0];}
+  else if(analyticsRange==='month'){const d=new Date();d.setDate(1);from=d.toISOString().split('T')[0];}
+  else{from=document.getElementById('analyticsFrom').value||toBase;to=document.getElementById('analyticsTo').value||toBase;}
+  return{from,to};
+}
+
+async function loadAnalytics(){
+  const{from,to}=getAnalyticsRange();
+  document.getElementById('analyticsDateLabel').textContent=from+' — '+to;
+  const url=SB_URL+'/rest/v1/entries?select=*&entry_date=gte.'+from+'&entry_date=lte.'+to+'&order=entry_date';
+  let data=[];
+  try{const r=await fetch(url,{headers:authHeaders()});if(r.ok)data=await r.json();}catch(e){}
+  renderKPIs(data,from,to);
+  renderTrendChart(data,from,to);
+  renderSectionChart(data);
+  renderAnalyticsTable(data,from,to);
+}
+
+function renderKPIs(data,from,to){
+  const total=data.length;
+  const filledSet=new Set(data.map(e=>e.param_id));
+  const filled=filledSet.size;
+  const total_params=params.length||1;
+  const pct=Math.round(filled/total_params*100);
+  const activeDays=new Set(data.map(e=>e.entry_date)).size;
+  const numVals=data.filter(e=>typeof e.value==='number');
+  const avg=numVals.length?Math.round(numVals.reduce((s,e)=>s+e.value,0)/numVals.length*10)/10:0;
+  document.getElementById('kpiTotalEntries').textContent=total;
+  document.getElementById('kpiFilledParams').textContent=filled+'/'+total_params;
+  document.getElementById('kpiCompletion').textContent=pct+'%';
+  document.getElementById('kpiActiveDays').textContent=activeDays+' kun';
+  document.getElementById('kpiAvgValue').textContent=avg;
+}
+
+function renderTrendChart(data,from,to){
+  const dates=datesBetween(from,to);
+  const counts={};data.forEach(e=>{counts[e.entry_date]=(counts[e.entry_date]||0)+1;});
+  const labels=dates.map(d=>{const p=d.slice(5).split('-');return p[1]+'/'+p[0];});
+  const vals=dates.map(d=>counts[d]||0);
+  document.getElementById('trendSub').textContent=data.length+' ta kiritish';
+  const ctx=document.getElementById('trendChart').getContext('2d');
+  if(chartTrend)chartTrend.destroy();
+  chartTrend=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets:[{label:'Kiritishlar',data:vals,borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,.1)',borderWidth:2,pointRadius:dates.length>20?0:3,pointBackgroundColor:'#6366f1',fill:true,tension:.4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{title:t=>'Sana: '+t[0].label}}},scales:{x:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10},maxTicksLimit:10}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10},precision:0},beginAtZero:true}}}
+  });
+}
+
+function renderSectionChart(data){
+  if(!params.length)return;
+  const sc={};
+  data.forEach(e=>{const p=params.find(x=>x.id===e.param_id);if(p){sc[p.section]=(sc[p.section]||0)+1;}});
+  const sections=Object.keys(sc).sort((a,b)=>sc[b]-sc[a]);
+  const vals=sections.map(s=>sc[s]);
+  const palette=['#6366f1','#8b5cf6','#0ea5e9','#059669','#f97316','#ec4899','#14b8a6','#f59e0b'];
+  document.getElementById('sectionSub').textContent=sections.length+' ta bo\'lim';
+  const ctx=document.getElementById('sectionChart').getContext('2d');
+  if(chartSection)chartSection.destroy();
+  chartSection=new Chart(ctx,{
+    type:'bar',
+    data:{labels:sections.map(s=>s.length>14?s.slice(0,13)+'…':s),datasets:[{data:vals,backgroundColor:sections.map((_,i)=>palette[i%palette.length]+'bb'),borderColor:sections.map((_,i)=>palette[i%palette.length]),borderWidth:1.5,borderRadius:5}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{size:10},precision:0},beginAtZero:true}}}
+  });
+}
+
+function renderAnalyticsTable(data,from,to){
+  const dates=datesBetween(from,to).reverse();
+  const total_params=params.length||1;
+  document.getElementById('tableSubLabel').textContent=dates.length+' kun';
+  document.getElementById('analyticsTableBody').innerHTML=dates.map(date=>{
+    const day=data.filter(e=>e.entry_date===date);
+    const filled=new Set(day.map(e=>e.param_id)).size;
+    const pct=Math.round(filled/total_params*100);
+    const sc=pct>=80?'st-high':pct>=50?'st-mid':pct>0?'st-low':'st-none';
+    const st=pct>=80?'Yaxshi':pct>=50?"O'rtacha":pct>0?'Past':'—';
+    return`<tr>
+      <td style="font-weight:600;font-variant-numeric:tabular-nums">${date}</td>
+      <td>${day.length}</td>
+      <td>${filled}/${total_params}</td>
+      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div><span class="bar-pct">${pct}%</span></div></td>
+      <td><span class="st-badge ${sc}">${st}</span></td>
+    </tr>`;
+  }).join('');
 }
