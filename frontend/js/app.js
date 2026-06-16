@@ -95,6 +95,8 @@ async function loadParams(){
   const{data,error}=await sbGet('params',{active:true});
   if(error){showToast('Yuklanmadi','error');return;}
   params=data||[];renderParams();
+  const pc=document.getElementById('paramsCount');
+  if(pc)pc.textContent=params.length+' ta';
 }
 
 async function loadEntries(){
@@ -135,21 +137,23 @@ function renderParams(filter=''){
 function selectParam(p){
   activeParam=p;
   document.querySelectorAll('.param-item').forEach(el=>{const n=el.querySelector('span:nth-child(2)');if(n&&n.textContent===p.name)el.classList.add('active');else el.classList.remove('active');});
-  document.getElementById('inputSectionLabel').textContent=p.section||'';
+  document.getElementById('inputSectionLabel').textContent=p.section||'—';
   document.getElementById('activeParamName').textContent=p.name;
   document.getElementById('unitLabel').textContent=p.unit||'—';
   const ex=entries[p.id];document.getElementById('valueInput').value=ex?ex.value:'';
   document.getElementById('valueInput').focus();
-  if(window.innerWidth<=560)document.getElementById('inputPanel').scrollIntoView({behavior:'smooth'});
+  if(window.innerWidth<=600)document.getElementById('inputPanel').scrollIntoView({behavior:'smooth'});
 }
 
 function updateTodayList(){
   const list=document.getElementById('todayList');const filled=Object.values(entries);
+  const badge=document.getElementById('todayCountBadge');
+  if(badge)badge.textContent=filled.length||'';
   if(!filled.length){list.innerHTML='<span class="empty-hint">Hali kiritilmagan</span>';return;}
   list.innerHTML=filled.map(e=>{const p=params.find(x=>x.id===e.param_id);return`<div class="today-entry"><div class="today-entry-name">${p?.name||''}</div><div class="today-entry-val">${e.value} ${p?.unit||''}</div></div>`;}).join('');
 }
 
 function showToast(msg,type=''){
-  const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');
   setTimeout(()=>{t.className='toast';},4000);
 }
