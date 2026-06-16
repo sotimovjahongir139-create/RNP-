@@ -3,51 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RNP — Ishlab Chiqarish</title>
-<link rel="stylesheet" href="css/style.css">
+<title>RNP</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--accent:#5b5fcf;--bg:#f0f2f5;--white:#fff;--sidebar-bg:#1a1d2e;--text:#1a1a2e;--muted:#6b7280;--border:#e5e7eb;--r:8px}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:var(--bg);color:var(--text)}
+.hidden{display:none!important}
+.login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1a1d2e,#2d2f52);display:flex;align-items:center;justify-content:center;z-index:100}
+.login-card{background:#fff;border-radius:16px;padding:2rem 2.5rem;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-logo{font-size:2rem;font-weight:800;color:var(--accent);text-align:center;letter-spacing:4px;margin-bottom:4px}
+.login-sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:1.5rem}
+.fg{margin-bottom:1rem}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.fg input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--r);font-size:14px;outline:none}
+.fg input:focus{border-color:var(--accent)}
+.err{color:#ef4444;font-size:12px;min-height:18px;margin-bottom:6px}
+.btn-primary{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:600;cursor:pointer}
+.btn-primary:hover{background:#4a4eb8}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.logo{font-size:1.3rem;font-weight:800;color:#fff;letter-spacing:3px}
+.sidebar-nav{flex:1;padding:8px 0}
+.nav-label{display:block;padding:8px 16px 3px;font-size:10px;font-weight:700;color:rgba(200,202,216,.4);letter-spacing:.08em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;color:#c8cad8;text-decoration:none;font-size:13px;border-left:3px solid transparent}
+.nav-item.active{background:rgba(91,95,207,.2);color:#fff;border-left-color:var(--accent)}
+.sidebar-footer{padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.user-email{color:rgba(200,202,216,.6);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+.btn-out{background:none;border:1px solid rgba(255,255,255,.2);color:#c8cad8;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer}
+.main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 16px;flex-shrink:0}
+.page-title{font-size:15px;font-weight:700}
+.topbar-right{margin-left:auto;display:flex;gap:8px}
+.date-input,.search-input{border:1.5px solid var(--border);border-radius:var(--r);padding:6px 10px;font-size:13px;outline:none;width:138px}
+.search-input{width:150px}
+.content-area{flex:1;display:flex;overflow:hidden}
+.params-panel{flex:1;overflow-y:auto;background:#fff;border-right:1px solid var(--border)}
+.sec-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;padding:10px 20px 4px;text-transform:uppercase}
+.param-item{display:flex;align-items:center;padding:9px 20px;cursor:pointer;font-size:13px;border-left:3px solid transparent}
+.param-item:hover{background:#f5f6ff}
+.param-item.active{background:rgba(91,95,207,.1);color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--border);margin-right:10px;flex-shrink:0}
+.param-item.active .dot{background:var(--accent)}
+.badge{margin-left:auto;font-size:11px;font-weight:600;color:var(--accent);background:rgba(91,95,207,.1);border-radius:10px;padding:1px 7px}
+.input-panel{width:260px;flex-shrink:0;background:#f7f8ff;border-left:1px solid var(--border);overflow-y:auto}
+.ip-inner{padding:16px 14px}
+.ip-sec{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.ip-name{font-size:13px;font-weight:600;margin-bottom:14px;min-height:36px;line-height:1.4}
+.input-row{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.val-input{flex:1;padding:9px 10px;border:1.5px solid var(--border);border-radius:var(--r);font-size:15px;outline:none;background:#fff}
+.val-input:focus{border-color:var(--accent)}
+.unit{font-size:12px;font-weight:600;color:var(--muted);min-width:32px;text-align:right}
+.btn-save{width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;margin-bottom:16px}
+.btn-save:hover{background:#4a4eb8}
+.today-lbl{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.today-list{display:flex;flex-direction:column;gap:5px}
+.t-entry{background:#fff;border:1px solid var(--border);border-radius:6px;padding:7px 10px}
+.t-name{color:var(--muted);font-size:11px}
+.t-val{font-weight:700;color:var(--accent);font-size:13px}
+.hint{font-size:12px;color:var(--muted)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1a1d2e;color:#fff;padding:9px 22px;border-radius:24px;font-size:13px;opacity:0;pointer-events:none;transition:transform .3s,opacity .3s;z-index:999}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.ok{background:#166534}
+.toast.err2{background:#991b1b}
+@media(max-width:720px){.sidebar{display:none}.search-input{width:100px}.date-input{width:110px}}
+@media(max-width:560px){.content-area{flex-direction:column}.params-panel{flex:none;height:45vh;border-right:none;border-bottom:1px solid var(--border)}.input-panel{width:100%;flex:1}}
+</style>
 </head>
 <body>
+
 <div id="loginOverlay" class="login-overlay">
   <div class="login-card">
     <div class="login-logo">RNP</div>
     <p class="login-sub">Ishlab chiqarish paneli</p>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="admin@rnp.uz" autocomplete="email">
-    </div>
-    <div class="form-group">
-      <label>Parol</label>
-      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
-    </div>
-    <div id="loginError" class="error-msg"></div>
-    <button id="loginBtn" class="btn-primary">Kirish</button>
+    <div class="fg"><label>Email</label><input type="email" id="lEmail" placeholder="admin@rnp.uz"></div>
+    <div class="fg"><label>Parol</label><input type="password" id="lPass" placeholder="••••••••"></div>
+    <div id="lErr" class="err"></div>
+    <button id="lBtn" class="btn-primary" onclick="doLogin()">Kirish</button>
   </div>
 </div>
+
 <div id="app" class="app hidden">
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <span class="logo">RNP</span>
-      <button class="sidebar-close" id="sidebarClose">✕</button>
-    </div>
+  <aside class="sidebar">
+    <div class="sidebar-header"><span class="logo">RNP</span></div>
     <nav class="sidebar-nav">
-      <div class="nav-group">
-        <span class="nav-label">ISHLAB CHIQARISH</span>
-        <a href="#" class="nav-item active"><span class="nav-icon">📋</span> Ishlab chiqarish</a>
-      </div>
-      <div class="nav-group">
-        <span class="nav-label">TAHLIL</span>
-        <a href="#" class="nav-item"><span class="nav-icon">📊</span> Tahlil</a>
-      </div>
+      <span class="nav-label">ISHLAB CHIQARISH</span>
+      <a href="#" class="nav-item active">📋 Ishlab chiqarish</a>
+      <span class="nav-label">TAHLIL</span>
+      <a href="#" class="nav-item">📊 Tahlil</a>
     </nav>
     <div class="sidebar-footer">
-      <span id="userDisplay" class="user-display"></span>
-      <button id="logoutBtn" class="btn-logout">Chiqish</button>
+      <span class="user-email" id="uEmail"></span>
+      <button class="btn-out" onclick="doLogout()">Chiqish</button>
     </div>
   </aside>
   <div class="main-wrap">
     <header class="topbar">
-      <button class="menu-btn" id="menuBtn">☰</button>
-      <h1 class="page-title">Ishlab chiqarish</h1>
+      <span class="page-title">Ishlab chiqarish</span>
       <div class="topbar-right">
-        <input
+        <input type="date" id="dateInput" class="date-input" onchange="onDateChange()">
+        <input type="text" id="searchInput" placeholder="Qidirish..." class="search-input" oninput="renderParams(this.value.toLowerCase())">
+      </div>
+    </header>
+    <div class="content-area">
+      <div class="params-panel"><div id="paramsList"></div></div>
+      <div class="input-panel">
+        <div class="ip-inner">
+          <div class="ip-sec" id="ipSec">—</div>
+          <div class="ip-name" id="ipName">Parametr tanlang</div>
+          <div class="input-row">
+            <input type="number" id="valInput" class="val-input" placeholder="Qiymat..." step="any" onkeydown="if(event.key==='Enter')saveValue()">
+            <span class="unit" id="unitLbl">—</span>
+          </div>
+          <button class="btn-save" onclick="saveValue()">✓ Saqlash</button>
+          <div class="today-lbl">BU KUN KIRITILGANLAR</div>
+          <div id="todayList" class="today-list"><span class="hint">Hali kiritilmagan</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const URL_='https://tzfwlailknlxwdgxvxrc.supabase.co';
+const KEY_='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6ZndsYWlsa25seHdkZ3h2eHJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1Mzg2NDYsImV4cCI6MjA5NzExNDY0Nn0.fPdICmSn18Diq3IuDCzSYPj1jnyPShFPJFY0PbJGsso';
+
+let user=null,allParams=[],allEntries={},active=null,curDate=new Date().toISOString().split('T')[0];
+
+function tok(){return localStorage.getItem('t')||KEY_;}
+function hdr(){return{'Content-Type':'application/json','apikey':KEY_,'Authorization':'Bearer '+tok()};}
+
+window.onload=function(){
+  document.getElementById('dateInput').value=curDate;
+  const u=localStorage.getItem('u');
+  if(u){user=JSON.parse(u);showApp();loadAll();}
+  else showLogin();
+  document.getElementById('lPass').onkeydown=function(e){if(e.key==='Enter')doLogin();};
+};
+
+function showLogin(){document.getElementById('loginOverlay').classList.remove('hidden');document.getElementById('app').classList.add('hidden');}
+function showApp(){document.getElementById('loginOverlay').classList.add('hidden');document.getElementById('app').classList.remove('hidden');document.getElementById('uEmail').textContent=user.email||'';}
+
+async function doLogin(){
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  const err=document.getElementById('lErr');
+  const btn=document.getElementById('lBtn');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Email va parol kiriting';return;}
+  btn.textContent='Kirilmoqda...';btn.disabled=true;
+  try{
+    const r=await fetch(URL_+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY_},body:JSON.stringify({email,password:pass})});
+    const d=await r.json();
+    if(!r.ok){err.textContent=d.error_description||d.msg||'Xato';return;}
+    localStorage.setItem('t',d.access_token);
+    localStorage.setItem('u',JSON.stringify(d.user));
+    user=d.user;showApp();loadAll();
+  }catch(e){err.textContent='Xato: '+e.message;}
+  finally{btn.textContent='Kirish';btn.disabled=false;}
+}
+
+function doLogout(){localStorage.removeItem('t');localStorage.removeItem('u');user=null;showLogin();}
+
+async function loadAll(){await loadParams();await loadEntries();}
+
+async function loadParams(){
+  const r=await fetch(URL_+'/rest/v1/params?select=*&active=eq.true&order=sort_order',{headers:hdr()});
+  const d=await r.json();
+  allParams=Array.isArray(d)?d:[];renderParams();
+}
+
+async function loadEntries(){
+  const r=await fetch(URL_+'/rest/v1/entries?select=*&entry_date=eq.'+curDate,{headers:hdr()});
+  const d=await r.json();
+  allEntries={};
+  if(Array.isArray(d))d.forEach(e=>{allEntries[e.param_id]=e;});
+  updateToday();
+}
+
+async function onDateChange(){
+  curDate=document.getElementById('dateInput').value;
+  await loadEntries();renderParams();
+}
+
+async function saveValue(){
+  if(!active){toast('Avval parametr tanlang','err2');return;}
+  const val=document.getElementById('valInput').value.trim();
+  if(!val){toast('Qiymat kiriting','err2');return;}
+  const body={param_id:active.id,value:parseFloat(val),entry_date:curDate,created_by:user.id};
+  const r=await fetch(URL_+'/rest/v1/entries?on_conflict=param_id,entry_date',{
+    method:'POST',
+    headers:{...hdr(),'Prefer':'resolution=merge-duplicates,return=representation'},
+    body:JSON.stringify(body)
+  });
+  const d=await r.json();
+  if(!r.ok){toast('Xato: '+JSON.stringify(d),'err2');return;}
+  const item=Array.isArray(d)?d[0]:d;
+  allEntries[active.id]=item;
+  renderParams(document.getElementById('searchInput').value.toLowerCase());
+  updateToday();toast('Saqlandi ✓','ok');
+  const idx=allParams.findIndex(p=>p.id===active.id);
+  if(idx<allParams.length-1)selectParam(allParams[idx+1]);
+}
+
+function renderParams(filter=''){
+  const c=document.getElementById('paramsList');c.innerHTML='';
+  const secs={};
+  allParams.forEach(p=>{
+    if(filter&&!p.name.toLowerCase().includes(filter))return;
+    const s=p.section||'Umumiy';
+    if(!secs[s])secs[s]=[];secs[s].push(p);
+  });
+  Object.entries(secs).forEach(([sec,list])=>{
+    const d=document.createElement('div');
+    d.innerHTML='<div class="sec-title">'+sec+'</div>';
+    list.forEach(p=>{
+      const e=allEntries[p.id];
+      const item=document.createElement('div');
+      item.className='param-item'+(active&&active.id===p.id?' active':'');
+      item.innerHTML='<span class="dot"></span><span>'+p.name+'</span>'+(e?'<span class="badge">'+e.value+' '+(p.unit||'')+'</span>':'');
+      item.onclick=()=>selectParam(p);
+      d.appendChild(item);
+    });
+    c.appendChild(d);
+  });
+}
+
+function selectParam(p){
+  active=p;
+  document.getElementById('ipSec').textContent=p.section||'';
+  document.getElementById('ipName').textContent=p.name;
+  document.getElementById('unitLbl').textContent=p.unit||'—';
+  const e=allEntries[p.id];
+  document.getElementById('valInput').value=e?e.value:'';
+  document.getElementById('valInput').focus();
+  renderParams(document.getElementById('searchInput').value.toLowerCase());
+  if(window.innerWidth<=560)document.querySelector('.input-panel').scrollIntoView({behavior:'smooth'});
+}
+
+function updateToday(){
+  const l=document.getElementById('todayList');
+  const items=Object.values(allEntries);
+  if(!items.length){l.innerHTML='<span class="hint">Hali kiritilmagan</span>';return;}
+  l.innerHTML=items.map(e=>{
+    const p=allParams.find(x=>x.id===e.param_id);
+    return'<div class="t-entry"><div class="t-name">'+(p?p.name:'')+'</div><div class="t-val">'+e.value+' '+(p?p.unit||'':'')+'</div></div>';
+  }).join('');
+}
+
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+(type||'');
+  setTimeout(()=>{t.className='toast';},3000);
+}
+</script>
+</body>
+</html>
