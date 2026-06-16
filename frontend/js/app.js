@@ -7,6 +7,15 @@ function authHeaders(){return{'Content-Type':'application/json','apikey':SB_KEY,
 
 let currentUser=null,params=[],entries={},activeParam=null,currentDate=today();
 
+async function sbSignup(email,password){
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
+    const d=await r.json();
+    if(!r.ok)return{error:{message:d.msg||d.error_description||"Ro'yxatdan o'tishda xato"}};
+    return{data:d};
+  }catch(e){return{error:{message:'Tarmoq xatosi: '+e.message}};}
+}
+
 async function sbLogin(email,password){
   try{
     const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
@@ -53,6 +62,10 @@ document.addEventListener('DOMContentLoaded',async()=>{
 function bindUI(){
   document.getElementById('loginBtn').addEventListener('click',doLogin);
   document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('registerBtn').addEventListener('click',doRegister);
+  document.getElementById('regPassword').addEventListener('keydown',e=>{if(e.key==='Enter')doRegister();});
+  document.getElementById('switchToRegister').addEventListener('click',e=>{e.preventDefault();document.getElementById('loginBtn').closest('.login-body').style.display='none';document.getElementById('registerForm').style.display='block';});
+  document.getElementById('switchToLogin').addEventListener('click',e=>{e.preventDefault();document.getElementById('registerForm').style.display='none';document.getElementById('loginBtn').closest('.login-body').style.display='block';});
   document.getElementById('logoutBtn').addEventListener('click',()=>{localStorage.removeItem('rnp_token');localStorage.removeItem('rnp_user');showLogin();});
   document.getElementById('dateInput').addEventListener('change',async e=>{currentDate=e.target.value;await loadEntries();renderParams();});
   document.getElementById('searchInput').addEventListener('input',e=>{renderParams(e.target.value.toLowerCase());});
@@ -83,6 +96,28 @@ async function doLogin(){
     errEl.textContent='Xato: '+e.message;
   }finally{
     btn.textContent='Kirish';btn.disabled=false;
+  }
+}
+
+async function doRegister(){
+  const email=document.getElementById('regEmail').value.trim();
+  const pass=document.getElementById('regPassword').value;
+  const errEl=document.getElementById('registerError');
+  const sucEl=document.getElementById('registerSuccess');
+  const btn=document.getElementById('registerBtn');
+  errEl.textContent='';sucEl.textContent='';
+  if(!email||!pass){errEl.textContent='Email va parol kiriting';return;}
+  if(pass.length<6){errEl.textContent='Parol kamida 6 ta belgi bo\'lishi kerak';return;}
+  btn.textContent='Ro\'yxatdan o\'tilmoqda...';btn.disabled=true;
+  const{data,error}=await sbSignup(email,pass);
+  btn.textContent='Ro\'yxatdan o\'tish';btn.disabled=false;
+  if(error){errEl.textContent=error.message;return;}
+  if(data.access_token){
+    localStorage.setItem('rnp_token',data.access_token);
+    localStorage.setItem('rnp_user',JSON.stringify(data.user));
+    currentUser=data.user;showApp();await loadAll();
+  }else{
+    sucEl.textContent='Email tasdiqlang! Pochtangizni tekshiring.';
   }
 }
 
